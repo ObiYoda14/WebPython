@@ -1,16 +1,22 @@
-<html>
-    <head>
-        <title> Contato </title>
-    </head>
-    <body>
-        <a href="https://www.w3schools.com/html/"> Isso aqui é um link </a>
-        <h1>Rafael Herman</h1>
-        <h2>rafael@email.com</h2>
-        <h3>4199998877</h3>
+{% extends "base.html" %}
 
-        <ol>
-            <li> item1 </li>
-            <li> item2 </li>
-        </ol>
-    </body>
-</html>
+{% block title %} Página inicial {% endblock %}
+
+{% block content %}
+    {% for post in posts %}
+        <article class="post">
+            <header>
+                <div>
+                    <h1>{{ post.title }}</h1>
+                    <div class="about">
+                        by {{ post.author }} on {{ post.created.strftime('%d/%m/%Y') }}
+                    </div>
+                </div>
+            </header>
+            <p class="body"> {{ post.body }} </p>
+        </article>
+        {% if not loop.last %}
+            <hr>
+        {% endif %}
+    {% endfor %}
+{% endblock %}
