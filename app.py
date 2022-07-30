@@ -4,15 +4,17 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 # Plugin de Flask Login (pip install flask-login)
 # UserMixin é tipo um db.Model
-from flask_login import LoginManager, UserMixin, current_user, logout_user, login_user
+from flask_login import LoginManager, UserMixin, current_user, logout_user, login_user, login_required
 #Módulo de Segurança instalado junto com o Flask para criptrografia da senhas
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from sqlalchemy.exc import IntegrityError
+import os
 
 # Atribui o Flask para a variável app ("hello" é o nome do app mas não usa pra nada)
 app = Flask("hello")
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
+# Quando no Heroku
+db_url = os.environ.get("DATABASE_URL") or "sqlite:///app.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url.replace("postgres", "postgresql")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 #Chave de criptografia para encriptar os dados
 app.config["SECRET_KEY"] = "pudim"
@@ -99,6 +101,21 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for("index"))
+
+@app.route("/create", methods=["GET", "POST"])
+@login_required
+def create():
+    if request.method == "POST":
+        title = request.form["title"]
+        body = request.form["body"]
+        try:
+            post = Post(title=title, body=body, author=current_user)
+            db.session.add(post)
+            db.session.commit()
+            return redirect(url_for("index"))
+        except IntegrityError:
+            flash("Error on create Post! Try again later.")
+    return render_template("create.html")
 
 #@app.route("/populate")
 #def populate():
