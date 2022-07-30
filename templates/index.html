@@ -2,6 +2,12 @@
 
 {% block title %} Página inicial {% endblock %}
 
+{% block header %}
+    <h1> Posts </h1>
+    {% if current_user.is_authenticated %}
+        <a class="action" href="{{ url_for('create') }}">New Posts</a>
+{% endblock %}
+
 {% block content %}
     {% for post in posts %}
         <article class="post">

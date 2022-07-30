@@ -12,8 +12,9 @@ import os
 
 # Atribui o Flask para a variável app ("hello" é o nome do app mas não usa pra nada)
 app = Flask("hello")
-# Quando no Heroku
+# Quando no Heroku, pega a variável do ambiente DATABASE_URL, senão usa o SQLite do ambiente de DEV
 db_url = os.environ.get("DATABASE_URL") or "sqlite:///app.db"
+# Devido a diferença do nome do Postgres do Flask para o Heroku, usa o replace para ajustar o nome
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url.replace("postgres", "postgresql")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 #Chave de criptografia para encriptar os dados
@@ -60,7 +61,7 @@ db.create_all()
 
 @app.route("/")
 def index():
-    posts = Post.query.all()
+    posts = Post.query.order_by(-Post.created).all()
     return render_template("index.html", posts=posts)
 
 @app.route("/register", methods=["GET", "POST"])
